@@ -19,6 +19,8 @@ _/buy_
 
 _/summary/user_
 
+_/summary/product_
+
 _/summary/all_
 
 

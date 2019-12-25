@@ -1,12 +1,15 @@
 package cz.etyka.exam.pub.service;
 
 import cz.etyka.exam.pub.entity.Drink;
-import cz.etyka.exam.pub.entity.User;
-import cz.etyka.exam.pub.repository.OrderRepository;
 import cz.etyka.exam.pub.entity.PubOrder;
+import cz.etyka.exam.pub.entity.User;
+import cz.etyka.exam.pub.exception.NotEnoughCashException;
+import cz.etyka.exam.pub.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,28 +22,28 @@ public class OrderService {
     @Autowired private UserService userService;
     @Autowired private DrinkService drinkService;
 
-    public PubOrder buy(long userId, long productId, int amount){
+    public PubOrder buy(long userId, long productId, int amount) throws NotEnoughCashException {
         PubOrder newOrder = PubOrder.builder()
                 .amount(amount)
                 .drink(drinkService.getDrink(productId))
                 .user(userService.getUser(userId))
                 .build();
 
-        PubOrder result =  saveOrder(newOrder);
-        // Not a very nice side effect
-        userService.deductMoney(userId, result.getPrice());
-        return result;
+        return saveOrder(newOrder);
 
     }
 
     public List<Drink> getUsersDrinks(long userId) {
+
         return iterableToList(getOrders()).stream()
                 .filter(o -> o.getUser().getId() == userId)
-                .map(PubOrder::getDrink)
+                .map(o -> Collections.nCopies(o.getAmount(), o.getDrink()))
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
     public List<User> getDrinkers(long productId) {
+
         return getOrdersByDrink(productId).stream()
                 .map(PubOrder::getUser)
                 .collect(Collectors.toList());
@@ -52,19 +55,16 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    private PubOrder saveOrder(PubOrder order){
-        if (order.getUser().getPocket().compareTo(order.getPrice()) < 0 ){
-            //TODO: Replace with custom RuntimeException
-            throw new IllegalArgumentException("Insufficient cash in users pocket. User: " + order.getUser().getName());
-        }
-        if (!order.getUser().isAdult() && order.getDrink().isForAdult()){
+    private PubOrder saveOrder(PubOrder order) throws NotEnoughCashException, IllegalArgumentException {
+        if (!order.getUser().isAdult() && order.getDrink().isForAdult()) {
             throw new IllegalArgumentException("User " + order.getUser().getName() + " is not and adult!");
         }
+        userService.deductMoney(order.getUser().getId(), order.getPrice());
+
         return repository.save(order);
     }
 
-    //TODO: Make private when api is finished
-    public Iterable<PubOrder> getOrders(){
+    private Iterable<PubOrder> getOrders() {
         return repository.findAll();
     }
 }

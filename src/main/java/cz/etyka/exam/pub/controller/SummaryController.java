@@ -33,15 +33,15 @@ public class SummaryController {
     @RequestMapping(value = "/user", method = GET)
     public Iterable<UserSummary> getUserSummary() {
         return iterableToList(userService.getUsers()).stream()
-//                .filter(User::isActive) // TODO: Filter inactive users?
+//                .filter(User::isActive) // Filter inactive users?
                 .map(u -> {
                     List<Drink> usersDrinks = orderService.getUsersDrinks(u.getId());
-                    BigDecimal price = usersDrinks.stream().map(Drink::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal finalPrice = usersDrinks.stream().map(Drink::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
                     return UserSummary.builder()
                             .userId(u.getId())
                             .drinks(usersDrinks)
-                            .price(price)
+                            .price(finalPrice)
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -4,9 +4,11 @@ package cz.etyka.exam.pub.controller;
 import cz.etyka.exam.pub.entity.User;
 import cz.etyka.exam.pub.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -23,7 +25,12 @@ public class UserController {
 
     @RequestMapping(value = "/user/{id}", method = GET)
     public User getUserDetails(@PathVariable long id) {
-        return service.getUser(id);
+        try {
+            return service.getUser(id);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "User not found: " + e.getLocalizedMessage(), e);
+        }
     }
 
 }

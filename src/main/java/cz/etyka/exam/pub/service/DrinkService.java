@@ -5,13 +5,15 @@ import cz.etyka.exam.pub.entity.Drink;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DrinkService {
 
     @Autowired private DrinkRepository repository;
 
-    public Iterable<Drink> getMenu(){
+    public List<Drink> getMenu(){
         return repository.findAll();
     }
-    public Drink getDrink(long id) {return repository.getOne(id);}
+    Drink getDrink(long id) {return repository.getOne(id);}
 }

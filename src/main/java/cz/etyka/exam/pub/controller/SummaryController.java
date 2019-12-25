@@ -6,6 +6,7 @@ import cz.etyka.exam.pub.service.DrinkService;
 import cz.etyka.exam.pub.service.OrderService;
 import cz.etyka.exam.pub.service.UserService;
 import cz.etyka.exam.pub.summary.AllSummary;
+import cz.etyka.exam.pub.summary.DrinkSummary;
 import cz.etyka.exam.pub.summary.UserSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static cz.etyka.exam.pub.util.Helpers.iterableToList;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
@@ -29,10 +29,9 @@ public class SummaryController {
     @Autowired
     private DrinkService drinkService;
 
-    // TODO: Doesn't take order amount into account when returning user's drinks
     @RequestMapping(value = "/user", method = GET)
     public Iterable<UserSummary> getUserSummary() {
-        return iterableToList(userService.getUsers()).stream()
+        return userService.getUsers().stream()
 //                .filter(User::isActive) // Filter inactive users?
                 .map(u -> {
                     List<Drink> usersDrinks = orderService.getUsersDrinks(u.getId());
@@ -47,9 +46,24 @@ public class SummaryController {
                 .collect(Collectors.toList());
     }
 
+    @RequestMapping(value = "/product", method = GET)
+    public Iterable<DrinkSummary> getDrinkSummary() {
+        return drinkService.getMenu().stream()
+                .map(d -> {
+                    int amount = orderService.getOrdersByDrink(d.getId()).size();
+
+                    return DrinkSummary.builder()
+                            .productId(d.getId())
+                            .amount(amount)
+                            .price(d.getPrice().multiply(BigDecimal.valueOf(amount)))
+                            .build();
+                }).collect(Collectors.toList());
+
+    }
+
     @RequestMapping(value = "/all", method = GET)
     public Iterable<AllSummary> getAllSummary() {
-        return iterableToList(drinkService.getMenu()).stream()
+        return drinkService.getMenu().stream()
                 .map(d -> {
                     List<PubOrder> orders = orderService.getOrdersByDrink(d.getId());
                     int totalAmount = orders.stream().map(PubOrder::getAmount).reduce(0, Integer::sum);

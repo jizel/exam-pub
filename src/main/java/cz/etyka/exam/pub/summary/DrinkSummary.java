@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class DrinkSummary {
-    private long userId;
+    private long productId;
     private int amount;
     private BigDecimal price;
 }

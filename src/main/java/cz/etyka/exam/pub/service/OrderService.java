@@ -42,13 +42,6 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public List<User> getDrinkers(long productId) {
-
-        return getOrdersByDrink(productId).stream()
-                .map(PubOrder::getUser)
-                .collect(Collectors.toList());
-    }
-
     public List<PubOrder> getOrdersByDrink(long productId) {
         return iterableToList(getOrders()).stream()
                 .filter(o -> o.getDrink().getId() == productId)

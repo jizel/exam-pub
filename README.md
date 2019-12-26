@@ -29,8 +29,8 @@ __username:password__
 
 alcoholic:1234
 
-teenager: 4321
+teenager:4321
 
-bartender: admin
+bartender:admin
 
 

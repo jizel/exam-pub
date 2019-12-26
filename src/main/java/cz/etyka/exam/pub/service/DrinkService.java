@@ -12,8 +12,13 @@ public class DrinkService {
 
     @Autowired private DrinkRepository repository;
 
-    public List<Drink> getMenu(){
+    public List<Drink> getMenu() {
         return repository.findAll();
+
     }
-    Drink getDrink(long id) {return repository.getOne(id);}
+
+    Drink getDrink(long id) {
+        return repository.getOne(id);
+    }
+
 }

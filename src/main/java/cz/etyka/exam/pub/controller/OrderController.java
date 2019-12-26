@@ -1,6 +1,7 @@
 package cz.etyka.exam.pub.controller;
 
 import cz.etyka.exam.pub.entity.PubOrder;
+import cz.etyka.exam.pub.exception.NotAdultException;
 import cz.etyka.exam.pub.exception.NotEnoughCashException;
 import cz.etyka.exam.pub.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,9 @@ public class OrderController {
     public PubOrder buyDrink(@RequestParam long userId, @RequestParam long productId, @RequestParam int amount) {
         try {
             return service.buy(userId, productId, amount);
-        } catch (NotEnoughCashException e) {
+        } catch (NotEnoughCashException | NotAdultException nce) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Unable to buy this item: " + e.getLocalizedMessage(), e);
+                    HttpStatus.BAD_REQUEST, "Unable to buy this item: " + nce.getLocalizedMessage(), nce);
         }
     }
 

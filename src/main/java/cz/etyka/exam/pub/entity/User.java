@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import cz.etyka.exam.pub.exception.NotEnoughCashException;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Collection;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,6 +23,9 @@ public class User {
     private boolean isActive;
     private boolean isAdult;
     @NonNull private BigDecimal pocket;
+    private String password;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Collection<Role> roles;
 
     /**
      * Deducts money from user's pocket
